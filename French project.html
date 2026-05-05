@@ -1,0 +1,1651 @@
+﻿<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arsène Lupin - Mission Classe</title>
+  <style>
+    :root {
+      --bg: #f8f4ea;
+      --ink: #1f2a36;
+      --paper: #fffef8;
+      --line: #dccfb3;
+      --navy: #184e77;
+      --blue: #1f7a8c;
+      --orange: #e36414;
+      --gold: #ffb703;
+      --good: #1b9e5a;
+      --bad: #c73737;
+      --shadow: 0 12px 30px rgba(14, 34, 56, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0% 0%, #fff3dc 0%, transparent 38%),
+        radial-gradient(circle at 100% 20%, #e5f4ff 0%, transparent 34%),
+        linear-gradient(160deg, #f8f4ea, #edf5fb);
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body:before,
+    body:after {
+      content: "";
+      position: fixed;
+      z-index: -1;
+      border-radius: 50%;
+      filter: blur(2px);
+      opacity: 0.45;
+      pointer-events: none;
+    }
+
+    body:before {
+      width: 340px;
+      height: 340px;
+      left: -90px;
+      top: 16%;
+      background: radial-gradient(circle at 30% 30%, #ffd48a, #ff9f5a);
+      animation: blobFloatA 18s ease-in-out infinite;
+    }
+
+    body:after {
+      width: 320px;
+      height: 320px;
+      right: -80px;
+      top: 58%;
+      background: radial-gradient(circle at 30% 30%, #84d8ff, #4ba3d2);
+      animation: blobFloatB 20s ease-in-out infinite;
+    }
+
+    .wrap {
+      width: min(1100px, 94vw);
+      margin: 22px auto 44px;
+    }
+
+    body.mode-mobile .wrap {
+      width: min(100vw, 100%);
+      margin: 0;
+      padding: 10px 10px 92px;
+    }
+
+    .hero {
+      background:
+        linear-gradient(130deg, rgba(24,78,119,0.96), rgba(31,122,140,0.92)),
+        repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0 10px, rgba(255,255,255,0.02) 10px 20px);
+      color: #fff;
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      animation: heroPulse 8s ease-in-out infinite;
+    }
+
+    .hero:after {
+      content: "";
+      position: absolute;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      right: -90px;
+      top: -80px;
+      background: rgba(255,255,255,0.12);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.5rem, 3.6vw, 2.4rem);
+      letter-spacing: 0.5px;
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      color: var(--navy);
+      font-size: clamp(1.15rem, 2.2vw, 1.45rem);
+    }
+
+    .sub {
+      max-width: 760px;
+      line-height: 1.45;
+      font-size: 1rem;
+    }
+
+    .topbar {
+      margin-top: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .pill {
+      background: rgba(255,255,255,0.16);
+      border: 1px solid rgba(255,255,255,0.35);
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+
+    .score {
+      background: #fff;
+      color: var(--navy);
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-weight: 800;
+      border: 2px solid rgba(255,255,255,0.45);
+    }
+
+    .hidden { display: none !important; }
+
+    .layout {
+      display: grid;
+      gap: 16px;
+      margin-top: 16px;
+      grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 940px) {
+      .layout {
+        grid-template-columns: 320px 1fr;
+      }
+    }
+
+    .card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 32px rgba(14, 34, 56, 0.16);
+    }
+
+    .sidebar .card { position: sticky; top: 12px; }
+
+    body.mode-mobile .sidebar {
+      display: none;
+    }
+
+    .steps {
+      padding-left: 20px;
+      margin: 10px 0;
+    }
+
+    .steps li {
+      margin: 8px 0;
+      line-height: 1.3;
+    }
+
+    .section {
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px dashed #d9ccad;
+      opacity: 0;
+      transform: translateY(16px);
+      animation: sectionEnter 0.55s ease forwards;
+      animation-delay: calc(var(--i, 0) * 90ms);
+    }
+
+    .section:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .summary {
+      background: #fff9ef;
+      border-left: 5px solid var(--orange);
+      border-radius: 12px;
+      padding: 12px;
+      line-height: 1.5;
+    }
+
+    .summary p { margin: 8px 0; }
+
+    .qblock {
+      background: #fcfbf6;
+      border: 1px solid #e2d7bb;
+      border-radius: 12px;
+      padding: 11px;
+      margin: 10px 0;
+    }
+
+    .qblock label {
+      font-weight: 700;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    select {
+      width: 100%;
+      border: 1px solid #b5c8dd;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 1rem;
+      font-family: inherit;
+      background: #fff;
+    }
+
+    .grid2 {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 760px) {
+      .grid2 { grid-template-columns: 1fr 1fr; }
+    }
+
+    .btnrow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    button {
+      border: none;
+      background: var(--blue);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+      transition: transform 0.12s ease, filter 0.12s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    button:hover {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+    }
+
+    button:after {
+      content: "";
+      position: absolute;
+      top: -120%;
+      left: -40%;
+      width: 34%;
+      height: 300%;
+      transform: rotate(22deg);
+      background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.55), rgba(255,255,255,0));
+      transition: left 0.55s ease;
+    }
+
+    button:hover:after {
+      left: 120%;
+    }
+
+    .alt { background: var(--orange); }
+    .ghost { background: #2a9d8f; }
+
+    .result {
+      margin-top: 8px;
+      display: inline-block;
+      padding: 7px 10px;
+      border-radius: 8px;
+      font-weight: 700;
+      animation: popIn 0.22s ease;
+    }
+
+    .ok { background: #dff5e8; color: var(--good); }
+    .bad { background: #fde6e6; color: var(--bad); }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .chip {
+      border: 1px solid #b7c8da;
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 0.92rem;
+    }
+
+    .chip:hover { background: #f3f9ff; }
+
+    .meter {
+      height: 12px;
+      border-radius: 999px;
+      background: #dfeaf2;
+      border: 1px solid #b3c8d8;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .meter > span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #ffb703, #e36414);
+      transition: width .25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .meter > span:after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(120deg, rgba(255,255,255,0.28) 0 8px, rgba(255,255,255,0) 8px 16px);
+      animation: stripeMove 1.2s linear infinite;
+    }
+
+    .tiny {
+      font-size: 0.9rem;
+      color: #40556e;
+    }
+
+    .team {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: 1fr 1fr;
+      margin-top: 10px;
+    }
+
+    .team div {
+      background: #f2f8ff;
+      border: 1px solid #c4d9ed;
+      padding: 9px;
+      border-radius: 10px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .hint {
+      margin-top: 8px;
+      background: #eef7ff;
+      border: 1px dashed #93b8db;
+      border-radius: 9px;
+      padding: 8px;
+      font-size: 0.93rem;
+      color: #24405b;
+      display: none;
+    }
+
+    .mode-banner {
+      margin-top: 10px;
+      display: inline-block;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.16);
+      border: 1px solid rgba(255,255,255,0.35);
+      font-weight: 700;
+      font-size: 0.92rem;
+    }
+
+    .assign-tag {
+      margin-left: 8px;
+      display: inline-block;
+      font-size: 0.78rem;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #e9f4ff;
+      color: #1e4e76;
+      border: 1px solid #b9d4ea;
+      vertical-align: middle;
+      animation: tagGlow 2.5s ease-in-out infinite;
+    }
+
+    .mode-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(14, 34, 56, 0.62);
+      backdrop-filter: blur(2px);
+      z-index: 1200;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+    }
+
+    .mode-card {
+      width: min(680px, 94vw);
+      background: #fffef8;
+      border-radius: 18px;
+      border: 1px solid #d8ccaf;
+      box-shadow: 0 24px 48px rgba(9, 24, 42, 0.28);
+      padding: 18px;
+    }
+
+    .mode-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: 1fr;
+      margin-top: 12px;
+    }
+
+    @media (min-width: 760px) {
+      .mode-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    .mode-option {
+      border: 1px solid #c4d7e9;
+      border-radius: 12px;
+      padding: 12px;
+      background: #f6fbff;
+    }
+
+    .mode-option h3 {
+      margin: 0 0 6px;
+      color: #184e77;
+    }
+
+    .mode-option p {
+      margin: 0 0 10px;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      color: #2c455d;
+    }
+
+    .congrats-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 28, 46, 0.72);
+      backdrop-filter: blur(3px);
+      z-index: 1300;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+    }
+
+    .congrats-card {
+      width: min(620px, 94vw);
+      border-radius: 18px;
+      border: 1px solid #d8ccaf;
+      background: linear-gradient(165deg, #fffef8, #fff6e7);
+      box-shadow: 0 24px 50px rgba(0, 0, 0, 0.32);
+      padding: 20px;
+      text-align: center;
+      animation: popIn 0.32s ease;
+    }
+
+    .congrats-title {
+      margin: 0 0 8px;
+      color: #e36414;
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
+    }
+
+    .congrats-score {
+      margin: 8px 0 14px;
+      font-weight: 800;
+      color: #184e77;
+    }
+
+    .line-card {
+      display: grid;
+      gap: 8px;
+      margin: 8px 0;
+      padding: 10px;
+      border: 1px solid #d8cba9;
+      border-radius: 10px;
+      background: #fffdf7;
+    }
+
+    .read-box {
+      background: #f6fbff;
+      border: 1px solid #c9def1;
+      border-radius: 10px;
+      padding: 10px;
+      line-height: 1.5;
+      font-size: 0.97rem;
+    }
+
+    .section.page-screen {
+      display: none;
+      opacity: 1;
+      transform: none;
+      animation: none;
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .section.page-screen.active {
+      display: block;
+      animation: pageFlip 0.38s ease;
+    }
+
+    .game-nav {
+      margin-top: 12px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .mobile-bar {
+      display: none;
+    }
+
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      z-index: 1100;
+      background: rgba(255, 253, 245, 0.96);
+      border: 1px solid #ccb892;
+      border-radius: 14px;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(4px);
+      padding: 8px;
+    }
+
+    .mobile-nav .btnrow {
+      margin: 4px 0 0;
+      justify-content: space-between;
+    }
+
+    .mobile-nav button {
+      flex: 1;
+      min-height: 42px;
+    }
+
+    .mobile-nav .btnrow button + button {
+      margin-left: 6px;
+    }
+
+    .mobile-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.87rem;
+      font-weight: 700;
+      color: #204666;
+    }
+
+    .game-nav-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.92rem;
+      color: #315170;
+      font-weight: 700;
+    }
+
+    .game-dots {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .dot-btn {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 1px solid #9ab5cc;
+      background: #e8f2fb;
+      padding: 0;
+      cursor: pointer;
+      transition: transform .15s ease, background .15s ease;
+    }
+
+    .dot-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .dot-btn.active {
+      background: #e36414;
+      border-color: #e36414;
+      box-shadow: 0 0 0 3px rgba(227, 100, 20, 0.2);
+    }
+
+    @keyframes pageFlip {
+      from { opacity: 0; transform: translateX(14px) scale(0.98); }
+      to { opacity: 1; transform: translateX(0) scale(1); }
+    }
+
+    .match-wrap {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 900px) {
+      .match-wrap {
+        grid-template-columns: 1.35fr 1fr;
+      }
+    }
+
+    .q1-legend {
+      font-size: 0.94rem;
+      color: #2a4f6f;
+      background: #eef7ff;
+      border: 1px dashed #9ec0df;
+      border-radius: 10px;
+      padding: 8px 10px;
+      margin-bottom: 10px;
+    }
+
+    .prompt-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .prompt-row {
+      background: #fcfbf6;
+      border: 1px solid #e2d7bb;
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    .prompt-id {
+      display: inline-flex;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      align-items: center;
+      justify-content: center;
+      margin-right: 8px;
+      background: #1f7a8c;
+      color: #fff;
+      font-weight: 800;
+    }
+
+    .dropzone {
+      margin-top: 8px;
+      min-height: 46px;
+      border: 2px dashed #a8bfd6;
+      border-radius: 10px;
+      background: #f7fbff;
+      padding: 7px;
+      display: flex;
+      align-items: center;
+    }
+
+    .dropzone.over,
+    .bank.over {
+      border-color: #1f7a8c;
+      background: #e8f5ff;
+    }
+
+    .bank {
+      min-height: 230px;
+      border: 2px dashed #c4d4e3;
+      border-radius: 12px;
+      background: #f8fbfe;
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+      align-content: start;
+    }
+
+    .drag-item {
+      border: 1px solid #b5c8dd;
+      border-radius: 10px;
+      background: #fff;
+      padding: 8px;
+      cursor: grab;
+      font-size: 0.95rem;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+      user-select: none;
+    }
+
+    .drag-item:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(24, 78, 119, 0.12);
+    }
+
+    .drag-item.dragging {
+      opacity: 0.45;
+    }
+
+    @keyframes sectionEnter {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes stripeMove {
+      from { transform: translateX(-40px); }
+      to { transform: translateX(40px); }
+    }
+
+    @keyframes blobFloatA {
+      0%, 100% { transform: translateY(0) translateX(0) scale(1); }
+      50% { transform: translateY(-20px) translateX(16px) scale(1.06); }
+    }
+
+    @keyframes blobFloatB {
+      0%, 100% { transform: translateY(0) translateX(0) scale(1); }
+      50% { transform: translateY(18px) translateX(-14px) scale(1.07); }
+    }
+
+    @keyframes heroPulse {
+      0%, 100% { filter: saturate(1); }
+      50% { filter: saturate(1.08); }
+    }
+
+    @keyframes tagGlow {
+      0%, 100% { box-shadow: 0 0 0 rgba(31, 122, 140, 0); }
+      50% { box-shadow: 0 0 0 6px rgba(31, 122, 140, 0.12); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .section {
+        animation: none;
+        opacity: 1;
+        transform: none;
+      }
+      .drag-item {
+        transition: none;
+      }
+      body:before,
+      body:after,
+      .hero,
+      .assign-tag,
+      .meter > span:after {
+        animation: none;
+      }
+    }
+
+    body.mode-mobile .hero {
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    body.mode-mobile .hero h1 {
+      font-size: 1.3rem;
+      margin-bottom: 4px;
+    }
+
+    body.mode-mobile .sub {
+      font-size: 0.9rem;
+      line-height: 1.35;
+    }
+
+    body.mode-mobile .topbar {
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    body.mode-mobile .pill {
+      padding: 5px 9px;
+      font-size: 0.78rem;
+    }
+
+    body.mode-mobile .score {
+      font-size: 0.88rem;
+      padding: 6px 9px;
+    }
+
+    body.mode-mobile .mode-banner {
+      font-size: 0.78rem;
+      margin-top: 8px;
+    }
+
+    body.mode-mobile .layout {
+      display: block;
+      margin-top: 10px;
+    }
+
+    body.mode-mobile main {
+      margin: 0;
+    }
+
+    body.mode-mobile .section.page-screen.active {
+      min-height: calc(100vh - 265px);
+    }
+
+    body.mode-mobile .card {
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    body.mode-mobile .qblock,
+    body.mode-mobile .line-card {
+      padding: 9px;
+      margin: 8px 0;
+    }
+
+    body.mode-mobile select {
+      font-size: 16px;
+      padding: 10px;
+    }
+
+    body.mode-mobile .game-nav {
+      display: none;
+    }
+
+    body.mode-mobile .mobile-bar,
+    body.mode-mobile .mobile-nav {
+      display: block;
+    }
+
+    body.mode-desktop .mobile-bar,
+    body.mode-desktop .mobile-nav {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="fxLayer" style="position:fixed; inset:0; pointer-events:none; z-index:9999;"></div>
+  <div class="congrats-overlay hidden" id="congratsOverlay">
+    <div class="congrats-card">
+      <h2 class="congrats-title">Félicitations !</h2>
+      <div>Progression complète à 100 %.</div>
+      <div class="congrats-score" id="congratsScore">Score final</div>
+      <div class="btnrow" style="justify-content:center;">
+        <button type="button" class="alt" onclick="closeCongrats()">Continuer</button>
+        <button type="button" onclick="replayGame()">Rejouer</button>
+      </div>
+    </div>
+  </div>
+  <div class="mode-overlay" id="modeOverlay">
+    <div class="mode-card">
+      <h2>Choisis le mode de jeu</h2>
+      <div class="tiny">Sélection obligatoire au démarrage. Le calcul du score change selon le mode.</div>
+      <div class="mode-grid">
+        <div class="mode-option">
+          <h3>Mode Indépendant</h3>
+          <p>Un seul joueur complète toutes les activités. Tu gagnes un score global unique.</p>
+          <button type="button" onclick="startMode('solo')">Commencer en solo</button>
+        </div>
+        <div class="mode-option">
+          <h3>Mode Équipes</h3>
+          <p>Les sections sont attribuées automatiquement (A/B en alternance). Les points vont à l'équipe de la section.</p>
+          <button type="button" class="alt" onclick="startMode('team')">Commencer en équipes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <header class="hero">
+      <h1>Mission Lupin : Le Jeu de Classe</h1>
+      <div class="sub">Révision interactive basée sur <em>L'arrestation d'Arsène Lupin</em>. Les équipes gagnent des points en résolvant les énigmes de compréhension, de grammaire et de vocabulaire.</div>
+      <div class="topbar">
+        <div class="pill">Niveau : A2/B1</div>
+        <div class="pill">Mode : Individuel ou Équipes</div>
+        <div class="score" id="scoreMain">Score : 0</div>
+        <button type="button" class="ghost" onclick="openAbout()">À propos du projet</button>
+      </div>
+      <div class="mode-banner" id="modeBanner">Mode actif : non choisi</div>
+      <div class="mobile-bar tiny" id="mobileModeLabel">Affichage : desktop</div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <section class="card">
+          <h2>Plan du jeu</h2>
+          <ol class="steps">
+            <li>Lire le résumé FR + EN.</li>
+            <li>Faire les 8 activités.</li>
+            <li>Vérifier section par section.</li>
+            <li>Annonce du score final.</li>
+          </ol>
+          <div class="meter"><span id="meter"></span></div>
+          <div class="tiny" id="progressText">Progression : 0 %</div>
+
+          <h2 style="margin-top:14px;">Mode Équipes</h2>
+          <div class="tiny" id="teamHint">En mode équipes, les points se calculent automatiquement selon la section.</div>
+          <div class="btnrow hidden" id="teamManualControls">
+            <button type="button" onclick="addTeam('A')">+1 Équipe A</button>
+            <button type="button" class="alt" onclick="addTeam('B')">+1 Équipe B</button>
+            <button type="button" class="ghost" onclick="resetTeams()">Réinitialiser les équipes</button>
+          </div>
+          <div class="team">
+            <div id="teamA">Équipe A : 0</div>
+            <div id="teamB">Équipe B : 0</div>
+          </div>
+        </section>
+      </aside>
+
+      <main id="gameMain">
+        <section class="card section" id="intro">
+          <h2>Résumé rapide du texte</h2>
+          <div class="summary">
+            <p><strong>Français :</strong> Sur le paquebot <em>La Provence</em>, un télégramme annonce qu'Arsène Lupin voyage sous un faux nom commençant par R. Les passagers soupçonnent Rozaine après le vol des bijoux de Lady Jerland. Puis Rozaine est libéré faute de preuves. Plus tard, on découvre qu'il n'est pas Lupin. Au moment du débarquement, Ganimard démasque le narrateur (d'Andrézy), qui avoue être Arsène Lupin. Miss Nelly jette son appareil photo à la mer pour protéger Lupin.</p>
+            <p><strong>English :</strong> On the ship <em>La Provence</em>, a telegram says Arsène Lupin is on board under a false name starting with R. After Lady Jerland's jewels are stolen, passengers suspect Rozaine. He is later released due to lack of evidence. It then becomes clear he is not Lupin. During disembarkation, Ganimard exposes the narrator (d'Andrézy), who is actually Arsène Lupin. Miss Nelly throws her camera into the sea to protect him.</p>
+          </div>
+        </section>
+
+        <section class="card section" id="about">
+          <h2>À propos du projet</h2>
+          <div class="summary">
+            <p><strong>Présentation :</strong> Je m'appelle Karam Al Sabbagh. Je suis en 8e année et j'ai 14 ans.</p>
+            <p><strong>Le projet :</strong> Ce site est un projet de français consacré au premier chapitre de <em>L'arrestation d'Arsène Lupin</em>. Il a été réalisé principalement par moi, avec l'aide de mes amis Majd et Sanad pour le travail sur les questions, les paragraphes et la vérification du texte.</p>
+            <p><strong>Remerciements :</strong> Le projet a été supervisé par mes professeures, Miss Nancy et Miss Rula. Je les remercie sincèrement pour leur accompagnement, et j'adresse également un remerciement particulier à l'ambassadeur de France.</p>
+          </div>
+          <div class="btnrow">
+            <button type="button" class="ghost" onclick="goToPage(0)">Retour au résumé</button>
+            <button type="button" onclick="openFirstActivity()">Commencer les activités</button>
+          </div>
+        </section>
+
+        <section class="card section" id="q1" data-team="A">
+          <h2>1) Associe correctement <span class="assign-tag hidden">Équipe A</span></h2>
+          <div class="q1-legend">Glisse chaque suite de phrase dans la bonne zone, puis clique sur Vérifier.</div>
+          <div class="match-wrap">
+            <div class="prompt-list">
+              <div class="prompt-row">
+                <span class="prompt-id">1</span>Un télégraphe vient de transmettre...
+                <div class="dropzone" data-key="e">Dépose la bonne suite ici</div>
+              </div>
+              <div class="prompt-row">
+                <span class="prompt-id">2</span>Arsène Lupin aime se déguiser, ce cambrioleur...
+                <div class="dropzone" data-key="c">Dépose la bonne suite ici</div>
+              </div>
+              <div class="prompt-row">
+                <span class="prompt-id">3</span>Monsieur d'Andrézy sort la liste des passagers..., mais...
+                <div class="dropzone" data-key="d">Dépose la bonne suite ici</div>
+              </div>
+              <div class="prompt-row">
+                <span class="prompt-id">4</span>Après le vol des bijoux de Lady Jerland, le commandant...
+                <div class="dropzone" data-key="a">Dépose la bonne suite ici</div>
+              </div>
+              <div class="prompt-row">
+                <span class="prompt-id">5</span>Mais le lendemain matin, le capitaine libère Rozaine,...
+                <div class="dropzone" data-key="b">Dépose la bonne suite ici</div>
+              </div>
+            </div>
+            <div>
+              <div class="tiny" style="font-weight:700; margin-bottom:6px;">Banque des suites</div>
+              <div class="bank" id="endingBank">
+                <div class="drag-item" draggable="true" data-key="d">... un seul correspond à la description de Lupin : Monsieur Rozaine.</div>
+                <div class="drag-item" draggable="true" data-key="b">... qui promet une somme de dix mille francs pour démasquer Lupin.</div>
+                <div class="drag-item" draggable="true" data-key="e">... qu'Arsène Lupin voyage seul sous le nom de R...</div>
+                <div class="drag-item" draggable="true" data-key="a">... arrête Monsieur Rozaine, ce qui tranquillise les passagers.</div>
+                <div class="drag-item" draggable="true" data-key="c">... visite les châteaux et les salons et vole tout ce qu'il veut.</div>
+              </div>
+            </div>
+          </div>
+          <div class="btnrow">
+            <button onclick="checkQ1Drag()">Vérifier Q1</button>
+            <button type="button" class="ghost" onclick="shuffleQ1()">Mélanger Q1</button>
+          </div>
+          <div id="res1"></div>
+        </section>
+
+        <section class="card section" id="q2" data-team="B">
+          <h2>2) Passé récent : venir de + infinitif <span class="assign-tag hidden">Équipe B</span></h2>
+          <div class="qblock">
+            <label>Modèle (déjà donné) :</label>
+            <div class="read-box">On vient de voler Monsieur Rozaine.</div>
+          </div>
+          <div class="grid2">
+            <div class="qblock"><label>1. La Provence (arriver) ... sur la côte.</label><select data-answer="La Provence vient d'arriver sur la côte."><option value="">Choisir</option><option>La Provence vient d'arriver sur la côte.</option><option>La Provence vient d'arrive sur la côte.</option><option>La Provence viennent d'arriver sur la côte.</option></select></div>
+            <div class="qblock"><label>2. Les passagers (descendre) ... sur la passerelle.</label><select data-answer="Les passagers viennent de descendre sur la passerelle."><option value="">Choisir</option><option>Les passagers vient de descendre sur la passerelle.</option><option>Les passagers viennent de descendre sur la passerelle.</option><option>Les passagers viennent à descendre sur la passerelle.</option></select></div>
+            <div class="qblock"><label>3. Monsieur Ganimard, vous (monter) ... à bord avec vos hommes.</label><select data-answer="Monsieur Ganimard, vous venez de monter à bord avec vos hommes."><option value="">Choisir</option><option>Monsieur Ganimard, vous venez de monter à bord avec vos hommes.</option><option>Monsieur Ganimard, vous vient de monter à bord avec vos hommes.</option><option>Monsieur Ganimard, vous venez monter à bord avec vos hommes.</option></select></div>
+            <div class="qblock"><label>4. Nous (arrêter) ... Lupin le cambrioleur.</label><select data-answer="Nous venons d'arrêter Lupin le cambrioleur."><option value="">Choisir</option><option>Nous venons d'arrêter Lupin le cambrioleur.</option><option>Nous viens d'arrêter Lupin le cambrioleur.</option><option>Nous venons de arrêter Lupin le cambrioleur.</option></select></div>
+          </div>
+          <div class="btnrow">
+            <button onclick="checkSelects('q2','res2',4)">Vérifier Q2</button>
+            <button type="button" class="ghost" onclick="showHint('hint2')">Indice</button>
+          </div>
+          <div class="hint" id="hint2">Conjugaison : venir -> je viens, tu viens, il/elle vient, nous venons, vous venez, ils viennent.</div>
+          <div id="res2"></div>
+        </section>
+
+        <section class="card section" id="q3" data-team="A">
+          <h2>3) DELF - Lecture orale (évaluation de l'enseignant) <span class="assign-tag hidden">Équipe A</span></h2>
+          <div class="qblock">
+            <label>L'équipe désignée lit ce dialogue à voix haute :</label>
+            <div class="read-box">
+              Commandant : Monsieur Rozaine, où étiez-vous hier soir ?<br>
+              Rozaine : J'étais dans ma cabine, Monsieur.<br>
+              Commandant : On a volé les bijoux de Lady Jerland. Avez-vous vu quelqu'un ?<br>
+              Rozaine : Non, personne. Je suis innocent.<br>
+              Commandant : Pourtant, votre nom commence par R...<br>
+              Rozaine : Oui, mais je ne suis pas Arsène Lupin.
+            </div>
+          </div>
+          <div class="btnrow">
+            <button type="button" onclick="gradeReadAloud(1)">1 point</button>
+            <button type="button" onclick="gradeReadAloud(2)">2 points</button>
+            <button type="button" onclick="gradeReadAloud(3)">3 points</button>
+            <button type="button" class="alt" onclick="gradeReadAloud(4)">4 points</button>
+          </div>
+          <div id="res3"></div>
+        </section>
+
+        <section class="card section" id="q4" data-team="B">
+          <h2>4) Anagrammes <span class="assign-tag hidden">Équipe B</span></h2>
+          <div class="grid2">
+            <div class="qblock"><label>vxheecu</label><select data-answer="cheveux"><option value="">Choisir</option><option>cheveux</option><option>yeux</option><option>poignets</option></select></div>
+            <div class="qblock"><label>xeyu</label><select data-answer="yeux"><option value="">Choisir</option><option>bras</option><option>yeux</option><option>tête</option></select></div>
+            <div class="qblock"><label>arsb</label><select data-answer="bras"><option value="">Choisir</option><option>bras</option><option>yeux</option><option>cheveux</option></select></div>
+            <div class="qblock"><label>ette</label><select data-answer="tête"><option value="">Choisir</option><option>tête</option><option>bras</option><option>poignets</option></select></div>
+            <div class="qblock"><label>soepnigt</label><select data-answer="poignets"><option value="">Choisir</option><option>cheveux</option><option>poignets</option><option>tête</option></select></div>
+          </div>
+          <div class="btnrow">
+            <button onclick="checkSelects('q4','res4',5)">Vérifier Q4</button>
+            <button type="button" class="ghost" onclick="showHint('hint4')">Indice</button>
+          </div>
+          <div class="hint" id="hint4">Tous les mots décrivent des parties du corps dans le portrait de Lupin/Rozaine.</div>
+          <div id="res4"></div>
+        </section>
+
+        <section class="card section" id="q5" data-team="A">
+          <h2>5) Mots croisés - Objet volé <span class="assign-tag hidden">Équipe A</span></h2>
+          <div class="grid2">
+            <div class="qblock"><label>1. Le sentiment de Miss Nelly pour d'Andrézy.</label><select data-answer="sympathie"><option value="">Choisir</option><option>argent</option><option>sympathie</option><option>orage</option></select></div>
+            <div class="qblock"><label>2. La cause de la panne du télégraphe.</label><select data-answer="orage"><option value="">Choisir</option><option>blessure</option><option>veste</option><option>orage</option></select></div>
+            <div class="qblock"><label>3. Le contenu du portefeuille de Rozaine.</label><select data-answer="argent"><option value="">Choisir</option><option>argent</option><option>perles</option><option>appareil</option></select></div>
+            <div class="qblock"><label>4. Celle de Ganimard est vert olive.</label><select data-answer="veste"><option value="">Choisir</option><option>veste</option><option>blessure</option><option>sympathie</option></select></div>
+            <div class="qblock"><label>5. Lady Jerland n'a plus ses...</label><select data-answer="perles"><option value="">Choisir</option><option>perles</option><option>poches</option><option>yeux</option></select></div>
+            <div class="qblock"><label>6. Lupin en a une sur le bras droit.</label><select data-answer="blessure"><option value="">Choisir</option><option>blessure</option><option>veste</option><option>dépêche</option></select></div>
+          </div>
+          <div class="qblock">
+            <label>Mot final (cases colorées) :</label>
+            <select data-answer="appareil" id="finalWord"><option value="">Choisir</option><option>appareil</option><option>portefeuille</option><option>bijoux</option></select>
+          </div>
+          <div class="btnrow">
+            <button onclick="checkSelects('q5','res5',7)">Vérifier Q5</button>
+          </div>
+          <div id="res5"></div>
+        </section>
+
+        <section class="card section" id="q6" data-team="B">
+          <h2>6) Personnages : associe la description <span class="assign-tag hidden">Équipe B</span></h2>
+          <div class="line-card">
+            <label>Cheveux blonds, blessure au bras droit, voyage sous un faux nom.</label>
+            <select data-answer="Arsène Lupin">
+              <option value="">Choisir le personnage</option>
+              <option>Arsène Lupin</option>
+              <option>Monsieur Rozaine</option>
+              <option>Miss Nelly</option>
+              <option>Ganimard</option>
+            </select>
+          </div>
+          <div class="line-card">
+            <label>Correspond à la description, semble proche de Miss Nelly, mais ce n'est pas Lupin.</label>
+            <select data-answer="Monsieur Rozaine">
+              <option value="">Choisir le personnage</option>
+              <option>Arsène Lupin</option>
+              <option>Monsieur Rozaine</option>
+              <option>Miss Nelly</option>
+              <option>Ganimard</option>
+            </select>
+          </div>
+          <div class="line-card">
+            <label>A de grands yeux noirs, elle est effrayée et inquiète.</label>
+            <select data-answer="Miss Nelly">
+              <option value="">Choisir le personnage</option>
+              <option>Arsène Lupin</option>
+              <option>Monsieur Rozaine</option>
+              <option>Miss Nelly</option>
+              <option>Ganimard</option>
+            </select>
+          </div>
+          <div class="line-card">
+            <label>Policier célèbre, il veut arrêter Arsène Lupin.</label>
+            <select data-answer="Ganimard">
+              <option value="">Choisir le personnage</option>
+              <option>Arsène Lupin</option>
+              <option>Monsieur Rozaine</option>
+              <option>Miss Nelly</option>
+              <option>Ganimard</option>
+            </select>
+          </div>
+          <div class="btnrow">
+            <button onclick="checkSelects('q6','res6',4)">Vérifier Q6</button>
+          </div>
+          <div id="res6"></div>
+        </section>
+
+        <section class="card section" id="q7" data-team="A">
+          <h2>7) Vocabulaire : original, sens français et anglais <span class="assign-tag hidden">Équipe A</span></h2>
+          <div class="line-card">
+            <label>une dépêche</label>
+            <select class="q7-fr" data-answer="un télégramme">
+              <option value="">Sens français</option>
+              <option>un télégramme</option><option>calme</option><option>un miroir</option><option>changer d'aspect</option><option>une chose</option><option>un concurrent</option><option>surpris</option>
+            </select>
+            <select class="q7-en" data-answer="a message">
+              <option value="">English meaning</option>
+              <option>a message</option><option>calm</option><option>mirror</option><option>disguise</option><option>something</option><option>opponent</option><option>surprised</option>
+            </select>
+          </div>
+          <div class="line-card">
+            <label>tranquillise</label>
+            <select class="q7-fr" data-answer="calme">
+              <option value="">Sens français</option>
+              <option>un télégramme</option><option>calme</option><option>un miroir</option><option>changer d'aspect</option><option>une chose</option><option>un concurrent</option><option>surpris</option>
+            </select>
+            <select class="q7-en" data-answer="calm">
+              <option value="">English meaning</option>
+              <option>a message</option><option>calm</option><option>mirror</option><option>disguise</option><option>something</option><option>opponent</option><option>surprised</option>
+            </select>
+          </div>
+          <div class="line-card">
+            <label>une glace</label>
+            <select class="q7-fr" data-answer="un miroir">
+              <option value="">Sens français</option>
+              <option>un télégramme</option><option>calme</option><option>un miroir</option><option>changer d'aspect</option><option>une chose</option><option>un concurrent</option><option>surpris</option>
+            </select>
+            <select class="q7-en" data-answer="mirror">
+              <option value="">English meaning</option>
+              <option>a message</option><option>calm</option><option>mirror</option><option>disguise</option><option>something</option><option>opponent</option><option>surprised</option>
+            </select>
+          </div>
+          <div class="line-card">
+            <label>se déguiser</label>
+            <select class="q7-fr" data-answer="changer d'aspect">
+              <option value="">Sens français</option>
+              <option>un télégramme</option><option>calme</option><option>un miroir</option><option>changer d'aspect</option><option>une chose</option><option>un concurrent</option><option>surpris</option>
+            </select>
+            <select class="q7-en" data-answer="disguise">
+              <option value="">English meaning</option>
+              <option>a message</option><option>calm</option><option>mirror</option><option>disguise</option><option>something</option><option>opponent</option><option>surprised</option>
+            </select>
+          </div>
+          <div class="line-card">
+            <label>un truc</label>
+            <select class="q7-fr" data-answer="une chose">
+              <option value="">Sens français</option>
+              <option>un télégramme</option><option>calme</option><option>un miroir</option><option>changer d'aspect</option><option>une chose</option><option>un concurrent</option><option>surpris</option>
+            </select>
+            <select class="q7-en" data-answer="something">
+              <option value="">English meaning</option>
+              <option>a message</option><option>calm</option><option>mirror</option><option>disguise</option><option>something</option><option>opponent</option><option>surprised</option>
+            </select>
+          </div>
+          <div class="line-card">
+            <label>un rival</label>
+            <select class="q7-fr" data-answer="un concurrent">
+              <option value="">Sens français</option>
+              <option>un télégramme</option><option>calme</option><option>un miroir</option><option>changer d'aspect</option><option>une chose</option><option>un concurrent</option><option>surpris</option>
+            </select>
+            <select class="q7-en" data-answer="opponent">
+              <option value="">English meaning</option>
+              <option>a message</option><option>calm</option><option>mirror</option><option>disguise</option><option>something</option><option>opponent</option><option>surprised</option>
+            </select>
+          </div>
+          <div class="line-card">
+            <label>étonnés</label>
+            <select class="q7-fr" data-answer="surpris">
+              <option value="">Sens français</option>
+              <option>un télégramme</option><option>calme</option><option>un miroir</option><option>changer d'aspect</option><option>une chose</option><option>un concurrent</option><option>surpris</option>
+            </select>
+            <select class="q7-en" data-answer="surprised">
+              <option value="">English meaning</option>
+              <option>a message</option><option>calm</option><option>mirror</option><option>disguise</option><option>something</option><option>opponent</option><option>surprised</option>
+            </select>
+          </div>
+          <div class="btnrow">
+            <button onclick="checkQ7()">Vérifier Q7</button>
+          </div>
+          <div id="res7"></div>
+        </section>
+
+        <section class="card section" id="q8" data-team="B">
+          <h2>8) Complète avec la banque de mots <span class="assign-tag hidden">Équipe B</span></h2>
+          <div class="qblock"><strong>Banque :</strong> une dépêche, tranquillise, une glace, se déguiser, un truc, un rival, étonnés</div>
+          <div class="line-card"><label>La nouvelle arrive par ________.</label><select data-answer="une dépêche"><option value="">Choisir</option><option>une dépêche</option><option>tranquillise</option><option>une glace</option><option>se déguiser</option><option>un truc</option><option>un rival</option><option>étonnés</option></select></div>
+          <div class="line-card"><label>Cette musique me ________.</label><select data-answer="tranquillise"><option value="">Choisir</option><option>une dépêche</option><option>tranquillise</option><option>une glace</option><option>se déguiser</option><option>un truc</option><option>un rival</option><option>étonnés</option></select></div>
+          <div class="line-card"><label>En été, je mange ________.</label><select data-answer="une glace"><option value="">Choisir</option><option>une dépêche</option><option>tranquillise</option><option>une glace</option><option>se déguiser</option><option>un truc</option><option>un rival</option><option>étonnés</option></select></div>
+          <div class="line-card"><label>Pour la fête, les enfants aiment ________.</label><select data-answer="se déguiser"><option value="">Choisir</option><option>une dépêche</option><option>tranquillise</option><option>une glace</option><option>se déguiser</option><option>un truc</option><option>un rival</option><option>étonnés</option></select></div>
+          <div class="line-card"><label>Il me montre ________ intéressant.</label><select data-answer="un truc"><option value="">Choisir</option><option>une dépêche</option><option>tranquillise</option><option>une glace</option><option>se déguiser</option><option>un truc</option><option>un rival</option><option>étonnés</option></select></div>
+          <div class="line-card"><label>Il a ________ en football.</label><select data-answer="un rival"><option value="">Choisir</option><option>une dépêche</option><option>tranquillise</option><option>une glace</option><option>se déguiser</option><option>un truc</option><option>un rival</option><option>étonnés</option></select></div>
+          <div class="line-card"><label>Nous sommes ________ par la surprise.</label><select data-answer="étonnés"><option value="">Choisir</option><option>une dépêche</option><option>tranquillise</option><option>une glace</option><option>se déguiser</option><option>un truc</option><option>un rival</option><option>étonnés</option></select></div>
+          <div class="btnrow">
+            <button onclick="checkSelects('q8','res8',7)">Vérifier Q8</button>
+          </div>
+          <div id="res8"></div>
+        </section>
+      </main>
+      <div class="game-nav">
+        <div class="game-nav-top">
+          <div id="pageLabel">Mission 1</div>
+          <div id="pageProgress">Page 1/10</div>
+        </div>
+        <div class="btnrow">
+          <button type="button" class="ghost" id="prevBtn" onclick="prevPage()">Mission précédente</button>
+          <button type="button" id="nextBtn" onclick="nextPage()">Mission suivante</button>
+        </div>
+        <div class="game-dots" id="pageDots"></div>
+      </div>
+      <div class="mobile-nav" id="mobileNav">
+        <div class="mobile-head">
+          <span id="mobilePageLabel">Mission 1</span>
+          <span id="mobilePageProgress">1/10</span>
+        </div>
+        <div class="btnrow">
+          <button type="button" class="ghost" id="mobilePrevBtn" onclick="prevPage()">Préc.</button>
+          <button type="button" id="mobileNextBtn" onclick="nextPage()">Suiv.</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SECTION_IDS = ["q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8"];
+    let gameMode = null;
+    let score = 0;
+    let donePoints = { q1: false, q2: false, q3: false, q4: false, q5: false, q6: false, q7: false, q8: false };
+    let teamA = 0;
+    let teamB = 0;
+    let draggedItem = null;
+    let congratsShown = false;
+    let pages = [];
+    let currentPage = 0;
+    let uiMode = "desktop";
+
+    function normalize(s) {
+      return (s || "")
+        .toLowerCase()
+        .trim()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[.!?]+$/g, "")
+        .replace(/\s+/g, " ");
+    }
+
+    function updateTop() {
+      const scoreEl = document.getElementById("scoreMain");
+      if (gameMode === "team") scoreEl.textContent = "A : " + teamA + " | B : " + teamB;
+      else scoreEl.textContent = "Score : " + score;
+
+      const completed = Object.values(donePoints).filter(Boolean).length;
+      const pct = Math.round((completed / SECTION_IDS.length) * 100);
+      document.getElementById("meter").style.width = pct + "%";
+      document.getElementById("progressText").textContent = "Progression : " + pct + " %";
+      document.getElementById("teamA").textContent = "Équipe A : " + teamA;
+      document.getElementById("teamB").textContent = "Équipe B : " + teamB;
+      if (pct === 100 && !congratsShown) showCongrats();
+    }
+
+    function initGamePages() {
+      pages = Array.from(document.querySelectorAll("#gameMain .section"));
+      pages.forEach((page) => page.classList.add("page-screen"));
+      const dots = document.getElementById("pageDots");
+      dots.innerHTML = "";
+      pages.forEach((_, idx) => {
+        const dot = document.createElement("button");
+        dot.type = "button";
+        dot.className = "dot-btn";
+        dot.setAttribute("aria-label", "Aller à la mission " + (idx + 1));
+        dot.addEventListener("click", () => goToPage(idx));
+        dots.appendChild(dot);
+      });
+      goToPage(0);
+    }
+
+    function detectUiMode() {
+      const mobileByWidth = window.matchMedia("(max-width: 860px)").matches;
+      const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
+      const mobile = mobileByWidth || coarsePointer;
+      uiMode = mobile ? "mobile" : "desktop";
+      document.body.classList.toggle("mode-mobile", mobile);
+      document.body.classList.toggle("mode-desktop", !mobile);
+      const modeLabel = document.getElementById("mobileModeLabel");
+      if (modeLabel) modeLabel.textContent = "Affichage : " + uiMode;
+    }
+
+    function updatePageNav() {
+      const total = pages.length || 1;
+      document.getElementById("pageProgress").textContent = "Page " + (currentPage + 1) + "/" + total;
+
+      const page = pages[currentPage];
+      let title = "Mission " + (currentPage + 1);
+      if (page && page.id === "intro") title = "Mission 1 - Briefing";
+      else if (page && page.id === "about") title = "À propos du projet";
+      else if (page && page.querySelector("h2")) {
+        const heading = page.querySelector("h2").cloneNode(true);
+        heading.querySelectorAll(".assign-tag").forEach((tag) => tag.remove());
+        title = heading.textContent.replace(/\s+/g, " ").trim();
+      }
+      document.getElementById("pageLabel").textContent = title;
+
+      document.getElementById("prevBtn").disabled = currentPage === 0;
+      document.getElementById("nextBtn").disabled = currentPage === total - 1;
+      const mp = document.getElementById("mobilePrevBtn");
+      const mn = document.getElementById("mobileNextBtn");
+      if (mp) mp.disabled = currentPage === 0;
+      if (mn) mn.disabled = currentPage === total - 1;
+      const mpl = document.getElementById("mobilePageLabel");
+      const mpp = document.getElementById("mobilePageProgress");
+      if (mpl) mpl.textContent = title;
+      if (mpp) mpp.textContent = (currentPage + 1) + "/" + total;
+
+      document.querySelectorAll("#pageDots .dot-btn").forEach((dot, idx) => {
+        dot.classList.toggle("active", idx === currentPage);
+      });
+    }
+
+    function goToPage(index) {
+      if (!pages.length) return;
+      currentPage = Math.max(0, Math.min(index, pages.length - 1));
+      pages.forEach((p, i) => p.classList.toggle("active", i === currentPage));
+      updatePageNav();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function nextPage() {
+      goToPage(currentPage + 1);
+    }
+
+    function prevPage() {
+      goToPage(currentPage - 1);
+    }
+
+    function openAbout() {
+      const aboutIndex = pages.findIndex((page) => page.id === "about");
+      if (aboutIndex >= 0) goToPage(aboutIndex);
+    }
+
+    function openFirstActivity() {
+      const firstActivityIndex = pages.findIndex((page) => page.id === SECTION_IDS[0]);
+      if (firstActivityIndex >= 0) goToPage(firstActivityIndex);
+    }
+
+    function showResult(targetId, c, t) {
+      const el = document.getElementById(targetId);
+      const ok = c === t;
+      el.className = "result " + (ok ? "ok" : "bad");
+      el.textContent = ok ? "Excellent : " + c + "/" + t : "Résultat : " + c + "/" + t;
+      if (ok) burstConfetti(el);
+    }
+
+    function award(sectionId, points) {
+      if (!donePoints[sectionId]) {
+        if (gameMode === "team") {
+          const section = document.getElementById(sectionId);
+          const assigned = section ? section.dataset.team : "A";
+          if (assigned === "A") teamA += points;
+          else teamB += points;
+        } else {
+          score += points;
+        }
+        donePoints[sectionId] = true;
+      }
+      updateTop();
+    }
+
+    function checkQ1Drag() {
+      const zones = document.querySelectorAll("#q1 .dropzone");
+      let c = 0;
+      zones.forEach((zone) => {
+        const item = zone.querySelector(".drag-item");
+        const ok = item && item.dataset.key === zone.dataset.key;
+        zone.style.borderColor = ok ? "#1b9e5a" : "#c73737";
+        zone.style.background = ok ? "#effcf4" : "#fff2f2";
+        if (ok) c++;
+      });
+      showResult("res1", c, 5);
+      award("q1", c);
+    }
+
+    function initDragMatch() {
+      const bank = document.getElementById("endingBank");
+      const zones = document.querySelectorAll("#q1 .dropzone");
+      const items = document.querySelectorAll("#q1 .drag-item");
+
+      items.forEach((item) => {
+        item.addEventListener("dragstart", () => {
+          draggedItem = item;
+          item.classList.add("dragging");
+        });
+        item.addEventListener("dragend", () => {
+          item.classList.remove("dragging");
+          draggedItem = null;
+        });
+      });
+
+      [bank, ...zones].forEach((target) => {
+        target.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          target.classList.add("over");
+        });
+        target.addEventListener("dragleave", () => {
+          target.classList.remove("over");
+        });
+        target.addEventListener("drop", (e) => {
+          e.preventDefault();
+          target.classList.remove("over");
+          if (!draggedItem) return;
+
+          if (target.id === "endingBank") {
+            target.appendChild(draggedItem);
+            return;
+          }
+
+          const existing = target.querySelector(".drag-item");
+          if (existing) bank.appendChild(existing);
+          target.appendChild(draggedItem);
+        });
+      });
+    }
+
+    function shuffleQ1() {
+      const bank = document.getElementById("endingBank");
+      const zones = document.querySelectorAll("#q1 .dropzone");
+      zones.forEach((zone) => {
+        const item = zone.querySelector(".drag-item");
+        if (item) bank.appendChild(item);
+        zone.style.borderColor = "#a8bfd6";
+        zone.style.background = "#f7fbff";
+      });
+
+      const items = Array.from(bank.querySelectorAll(".drag-item"));
+      for (let i = items.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [items[i], items[j]] = [items[j], items[i]];
+      }
+      items.forEach((item) => bank.appendChild(item));
+
+      const res = document.getElementById("res1");
+      res.textContent = "";
+      res.className = "";
+    }
+
+    function checkSelects(sectionId, resultId, total) {
+      const section = document.getElementById(sectionId);
+      const items = section.querySelectorAll("select[data-answer]");
+      let c = 0;
+      items.forEach((el) => {
+        const ok = normalize(el.value) === normalize(el.dataset.answer);
+        el.style.borderColor = ok ? "#1b9e5a" : "#c73737";
+        el.style.background = ok ? "#effcf4" : "#fff2f2";
+        if (ok) c++;
+      });
+      showResult(resultId, c, total);
+      award(sectionId, c);
+    }
+
+    function checkQ7() {
+      const section = document.getElementById("q7");
+      const fr = section.querySelectorAll(".q7-fr");
+      const en = section.querySelectorAll(".q7-en");
+      let c = 0;
+      for (let i = 0; i < fr.length; i++) {
+        const okFr = normalize(fr[i].value) === normalize(fr[i].dataset.answer);
+        const okEn = normalize(en[i].value) === normalize(en[i].dataset.answer);
+        fr[i].style.borderColor = okFr ? "#1b9e5a" : "#c73737";
+        fr[i].style.background = okFr ? "#effcf4" : "#fff2f2";
+        en[i].style.borderColor = okEn ? "#1b9e5a" : "#c73737";
+        en[i].style.background = okEn ? "#effcf4" : "#fff2f2";
+        if (okFr && okEn) c++;
+      }
+      showResult("res7", c, 7);
+      award("q7", c);
+    }
+
+    function showHint(id) {
+      const el = document.getElementById(id);
+      el.style.display = el.style.display === "block" ? "none" : "block";
+    }
+
+    function gradeReadAloud(pts) {
+      const r = document.getElementById("res3");
+      r.className = "result ok";
+      r.textContent = "Évaluation de l'enseignant : " + pts + "/4";
+      award("q3", pts);
+    }
+
+    function addTeam(team) {
+      if (gameMode !== "team") return;
+      if (team === "A") teamA++;
+      else teamB++;
+      updateTop();
+    }
+
+    function resetTeams() {
+      if (gameMode !== "team") return;
+      teamA = 0;
+      teamB = 0;
+      updateTop();
+    }
+
+    function setSectionDelays() {
+      const sections = document.querySelectorAll(".section");
+      sections.forEach((sec, index) => {
+        sec.style.setProperty("--i", index);
+      });
+    }
+
+    function setModeUi() {
+      const banner = document.getElementById("modeBanner");
+      const manual = document.getElementById("teamManualControls");
+      const tags = document.querySelectorAll(".assign-tag");
+      const hint = document.getElementById("teamHint");
+
+      if (gameMode === "team") {
+        banner.textContent = "Mode actif : Équipes (sections attribuées automatiquement)";
+        manual.classList.add("hidden");
+        hint.textContent = "Chaque section appartient à une équipe (A/B). Les points se calculent automatiquement.";
+        tags.forEach((tag) => tag.classList.remove("hidden"));
+      } else {
+        banner.textContent = "Mode actif : Indépendant";
+        manual.classList.add("hidden");
+        hint.textContent = "Mode solo : complète toutes les activités pour ton score personnel.";
+        tags.forEach((tag) => tag.classList.add("hidden"));
+      }
+    }
+
+    function resetGameState() {
+      score = 0;
+      teamA = 0;
+      teamB = 0;
+      congratsShown = false;
+      donePoints = { q1: false, q2: false, q3: false, q4: false, q5: false, q6: false, q7: false, q8: false };
+      closeCongrats();
+      document.querySelectorAll("select[data-answer], .q7-fr, .q7-en").forEach((el) => {
+        el.value = "";
+        el.style.borderColor = "#b5c8dd";
+        el.style.background = "#fff";
+      });
+
+      document.getElementById("hint2").style.display = "none";
+      document.getElementById("hint4").style.display = "none";
+
+      ["res1", "res2", "res3", "res4", "res5", "res6", "res7", "res8"].forEach((id) => {
+        const el = document.getElementById(id);
+        el.textContent = "";
+        el.className = "";
+      });
+
+      shuffleQ1();
+      goToPage(0);
+      updateTop();
+    }
+
+    function startMode(mode) {
+      gameMode = mode;
+      setModeUi();
+      resetGameState();
+      document.getElementById("modeOverlay").classList.add("hidden");
+    }
+
+    function showCongrats() {
+      congratsShown = true;
+      const text = gameMode === "team"
+        ? "Score final : Équipe A " + teamA + " | Équipe B " + teamB
+        : "Score final : " + score;
+      document.getElementById("congratsScore").textContent = text;
+      document.getElementById("congratsOverlay").classList.remove("hidden");
+      burstConfetti(document.getElementById("congratsScore"));
+    }
+
+    function closeCongrats() {
+      document.getElementById("congratsOverlay").classList.add("hidden");
+    }
+
+    function replayGame() {
+      closeCongrats();
+      resetGameState();
+    }
+
+    function burstConfetti(anchor) {
+      const fx = document.getElementById("fxLayer");
+      if (!fx || !anchor) return;
+      const rect = anchor.getBoundingClientRect();
+      const baseX = rect.left + rect.width / 2;
+      const baseY = rect.top + 8;
+      const colors = ["#ff6b35", "#ffb703", "#4ba3d2", "#2a9d8f", "#7b2cbf"];
+
+      for (let i = 0; i < 18; i++) {
+        const dot = document.createElement("span");
+        const size = 6 + Math.random() * 5;
+        const angle = (Math.PI * 2 * i) / 18;
+        const dist = 45 + Math.random() * 75;
+        const dx = Math.cos(angle) * dist;
+        const dy = Math.sin(angle) * dist;
+        dot.style.position = "fixed";
+        dot.style.left = baseX + "px";
+        dot.style.top = baseY + "px";
+        dot.style.width = size + "px";
+        dot.style.height = size + "px";
+        dot.style.borderRadius = "50%";
+        dot.style.background = colors[i % colors.length];
+        dot.style.opacity = "0.95";
+        dot.style.transform = "translate(-50%, -50%)";
+        dot.style.transition = "transform 620ms ease-out, opacity 620ms ease-out";
+        fx.appendChild(dot);
+        requestAnimationFrame(() => {
+          dot.style.transform = "translate(" + dx + "px," + dy + "px)";
+          dot.style.opacity = "0";
+        });
+        setTimeout(() => dot.remove(), 700);
+      }
+    }
+
+    setSectionDelays();
+    detectUiMode();
+    initGamePages();
+    initDragMatch();
+    updateTop();
+    window.addEventListener("resize", detectUiMode);
+    document.addEventListener("keydown", (e) => {
+      if (document.getElementById("modeOverlay") && !document.getElementById("modeOverlay").classList.contains("hidden")) return;
+      if (document.getElementById("congratsOverlay") && !document.getElementById("congratsOverlay").classList.contains("hidden")) return;
+      if (e.key === "ArrowRight") nextPage();
+      if (e.key === "ArrowLeft") prevPage();
+    });
+  </script>
+</body>
+</html>
